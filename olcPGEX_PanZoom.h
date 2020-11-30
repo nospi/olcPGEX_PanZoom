@@ -149,11 +149,11 @@ namespace olc {
 
 		void zoom(float fScaleMultiplier)
 		{
-            olc::vf2d mwPreZoom, mwPostZoom;
-            ScreenToWorld(GetMouseVec(), mwPreZoom);
-            scale *= fScaleMultiplier;
-            ScreenToWorld(GetMouseVec(), mwPostZoom);
-            offset += (mwPreZoom - mwPostZoom);
+				olc::vf2d mwPreZoom, mwPostZoom;
+				ScreenToWorld(GetMouseVec(), mwPreZoom);
+				scale *= fScaleMultiplier;
+				ScreenToWorld(GetMouseVec(), mwPostZoom);
+				offset += (mwPreZoom - mwPostZoom);
 		}
 
     public:
@@ -185,7 +185,7 @@ namespace olc {
 
         void StopPan()
         {
-            bPanning = false;
+			bPanning = false;
         }
 
         void ZoomIn(float fScaleMultiplier = 1.001f)
