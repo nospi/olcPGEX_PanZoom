@@ -45,9 +45,7 @@
         Twitch:		https://www.twitch.tv/javidx9
         GitHub:		https://www.github.com/onelonecoder
         Homepage:	https://www.onelonecoder.com
-        Author: 	https://github.com/nospi
-        ~~~~~~
-        David Barr, aka javidx9, ©OneLoneCoder 2019, 2020
+        Author: 	David Barr, aka javidx9, ©OneLoneCoder 2019, 2020
 
 
         Example program, adapted from javidx9's pan/zoom tutorial:
