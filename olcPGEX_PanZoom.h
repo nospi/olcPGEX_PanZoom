@@ -133,7 +133,7 @@
 #define OLC_PGEX_PANZOOM_H
 
 namespace olc {
-    class panzoom : olc::PGEX
+    class panzoom : public olc::PGEX
     {
     private:
         olc::vf2d offset { 0.0f, 0.0f };
