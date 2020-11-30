@@ -8,7 +8,7 @@
         ~~~~~~~~~~~~~
         Simple pan/zoom extenson for OLC PixelGameEngine. 
         Adapted from the panning & zooming tutorial.
-		https://www.youtube.com/watch?v=ZQ8qtAizis4
+        https://www.youtube.com/watch?v=ZQ8qtAizis4
 
 
         License (OLC-3)
@@ -147,14 +147,14 @@ namespace olc {
             return olc::vf2d((float)pge->GetMouseX(), (float)pge->GetMouseY());
         }
 
-		void zoom(float fScaleMultiplier)
-		{
-				olc::vf2d mwPreZoom, mwPostZoom;
-				ScreenToWorld(GetMouseVec(), mwPreZoom);
-				scale *= fScaleMultiplier;
-				ScreenToWorld(GetMouseVec(), mwPostZoom);
-				offset += (mwPreZoom - mwPostZoom);
-		}
+        void zoom(float fScaleMultiplier)
+        {
+            olc::vf2d mwPreZoom, mwPostZoom;
+            ScreenToWorld(GetMouseVec(), mwPreZoom);
+            scale *= fScaleMultiplier;
+            ScreenToWorld(GetMouseVec(), mwPostZoom);
+            offset += (mwPreZoom - mwPostZoom);
+        }
 
     public:
         void WorldToScreen(olc::vf2d world, olc::vi2d& screen)
@@ -185,21 +185,21 @@ namespace olc {
 
         void StopPan()
         {
-			bPanning = false;
+            bPanning = false;
         }
 
         void ZoomIn(float fScaleMultiplier = 1.001f)
         {
-			if (fScaleMultiplier <= 1.0f)
-				fScaleMultiplier += 0.0001f;
-			zoom(fScaleMultiplier);
+            if (fScaleMultiplier <= 1.0f)
+                fScaleMultiplier += 0.0001f;
+            zoom(fScaleMultiplier);
         }
 
         void ZoomOut(float fScaleMultiplier = 0.999f)
         {
-			if (fScaleMultiplier >= 1.0f)
-				fScaleMultiplier -= 0.0001f;
-			zoom(fScaleMultiplier);
+            if (fScaleMultiplier >= 1.0f)
+                fScaleMultiplier -= 0.0001f;
+            zoom(fScaleMultiplier);
         }
 
         bool OnUpdate(float _fElapsedTime)
