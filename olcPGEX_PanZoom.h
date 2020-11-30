@@ -7,7 +7,8 @@
         What is this?
         ~~~~~~~~~~~~~
         Simple pan/zoom extenson for OLC PixelGameEngine. 
-        Adapted from the panning & zooming tutorial: [Link](https://www.youtube.com/watch?v=ZQ8qtAizis4)
+        Adapted from the panning & zooming tutorial.
+		https://www.youtube.com/watch?v=ZQ8qtAizis4
 
 
         License (OLC-3)
@@ -44,7 +45,7 @@
         Twitch:		https://www.twitch.tv/javidx9
         GitHub:		https://www.github.com/onelonecoder
         Homepage:	https://www.onelonecoder.com
-        Author      https://github.com/nospi
+        Author: 	https://github.com/nospi
         ~~~~~~
         David Barr, aka javidx9, ©OneLoneCoder 2019, 2020
 
@@ -146,6 +147,15 @@ namespace olc {
             return olc::vf2d((float)pge->GetMouseX(), (float)pge->GetMouseY());
         }
 
+		void zoom(float fScaleMultiplier)
+		{
+            olc::vf2d mwPreZoom, mwPostZoom;
+            ScreenToWorld(GetMouseVec(), mwPreZoom);
+            scale *= fScaleMultiplier;
+            ScreenToWorld(GetMouseVec(), mwPostZoom);
+            offset += (mwPreZoom - mwPostZoom);
+		}
+
     public:
         void WorldToScreen(olc::vf2d world, olc::vi2d& screen)
         {
@@ -180,20 +190,16 @@ namespace olc {
 
         void ZoomIn(float fScaleMultiplier = 1.001f)
         {
-            olc::vf2d mwPreZoom, mwPostZoom;    // mouse world pos pre and post zoom
-            ScreenToWorld(GetMouseVec(), mwPreZoom);
-            scale *= fScaleMultiplier;
-            ScreenToWorld(GetMouseVec(), mwPostZoom);
-            offset += (mwPreZoom - mwPostZoom);
+			if (fScaleMultiplier <= 1.0f)
+				fScaleMultiplier += 0.0001f;
+			zoom(fScaleMultiplier);
         }
 
         void ZoomOut(float fScaleMultiplier = 0.999f)
         {
-            olc::vf2d mwPreZoom, mwPostZoom;    // mouse world pos pre and post zoom
-            ScreenToWorld(GetMouseVec(), mwPreZoom);
-            scale *= fScaleMultiplier;
-            ScreenToWorld(GetMouseVec(), mwPostZoom);
-            offset += (mwPreZoom - mwPostZoom);
+			if (fScaleMultiplier >= 1.0f)
+				fScaleMultiplier -= 0.0001f;
+			zoom(fScaleMultiplier);
         }
 
         bool OnUpdate(float _fElapsedTime)
