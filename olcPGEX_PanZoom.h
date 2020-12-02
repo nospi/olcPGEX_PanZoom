@@ -47,84 +47,6 @@
         Homepage:	https://www.onelonecoder.com
         Author: 	David Barr, aka javidx9, ©OneLoneCoder 2019, 2020
 
-
-        Example program, adapted from javidx9's pan/zoom tutorial:
-        ~~~~~~
-        #define OLC_PGE_APPLICATION
-        #include "olcPixelGameEngine.h"
-        #include "olcPGEX_PanZoom.h"
-
-        class PanZoomDemo : public olc::PixelGameEngine
-        {
-        private:
-            olc::panzoom pz;
-
-        public:
-            PanZoomDemo()
-            {
-                sAppName = "Pan/Zoom PGEX Demo";
-            }
-
-            bool OnUserCreate() override
-            {
-                pz.Create(this);    // pass instance of PGE
-                return true;
-            }
-
-            bool OnUserUpdate(float fElapsedTime)
-            {
-                Clear(0);
-
-                // pass input to panzoom
-                if (GetMouse(0).bPressed)
-                    pz.StartPan();
-                if (GetMouse(0).bReleased)
-                    pz.StopPan();
-                if (GetKey(olc::Q).bHeld)
-                    pz.ZoomIn(1.001f);  // optional fScaleMultiplier here -- not clamped, can allow ZoomIn to actually zoom out..
-                if (GetKey(olc::A).bHeld)
-                    pz.ZoomOut();
-                
-                // call pz update method
-                pz.OnUpdate(fElapsedTime);
-
-                // draw vertical lines
-                for (float y = 0.0f; y <= 10.0f; y++)
-                {
-                    olc::vf2d w_start, w_end;
-                    olc::vi2d s_start, s_end;
-                    w_start = { 0.0f, y };
-                    w_end = { 10.0f, y };
-                    pz.WorldToScreen(w_start, s_start);
-                    pz.WorldToScreen(w_end, s_end);
-                    DrawLine(s_start, s_end);
-                }
-
-                // draw horizontal lines
-                for (float x = 0.0f; x <= 10.0f; x++)
-                {
-                    olc::vf2d w_start, w_end;
-                    olc::vi2d s_start, s_end;
-                    w_start = { x, 0.0f };
-                    w_end = { x, 10.0f };
-                    pz.WorldToScreen(w_start, s_start);
-                    pz.WorldToScreen(w_end, s_end);
-                    DrawLine(s_start, s_end);
-                }
-
-                return true;
-            }
-        };
-
-        int main()
-        {
-            PanZoomDemo demo;
-            demo.Construct(320, 200, 4, 4);
-            demo.Start();
-            return 0;
-        }
-        ~~~~~~
-
 */
 
 #ifndef OLC_PGEX_PANZOOM_H
@@ -134,44 +56,70 @@ namespace olc {
     class panzoom : public olc::PGEX
     {
     private:
-        olc::vf2d offset { 0.0f, 0.0f };
-        olc::vf2d startPan { 0.0f, 0.0f };
-        olc::vf2d scale { 1.0f, 1.0f };
-        olc::vf2d mouse;
+        olc::vd2d offset { 0.0, 0.0 };
+        olc::vd2d startPan { 0.0, 0.0 };
+        olc::vd2d scale { 1.0, 1.0 };
+        olc::vd2d mouse;
         bool bPanning = false;
 
-        olc::vf2d GetMouseVec()
+        olc::vd2d GetMouseVec()
         {
-            return olc::vf2d((float)pge->GetMouseX(), (float)pge->GetMouseY());
+            return olc::vd2d((double)pge->GetMouseX(), (double)pge->GetMouseY());
         }
 
-        void zoom(float fScaleMultiplier)
+        void zoom(double dScaleMultiplier)
         {
-            olc::vf2d mwPreZoom, mwPostZoom;
+            olc::vd2d mwPreZoom, mwPostZoom;
             ScreenToWorld(GetMouseVec(), mwPreZoom);
-            scale *= fScaleMultiplier;
+            scale *= dScaleMultiplier;
             ScreenToWorld(GetMouseVec(), mwPostZoom);
             offset += (mwPreZoom - mwPostZoom);
         }
 
     public:
-        void WorldToScreen(olc::vf2d world, olc::vi2d& screen)
+        void WorldToScreen(const olc::vf2d& world, olc::vi2d& screen)
         {
-            screen.x = (int)((world.x - offset.x) * scale.x);
-            screen.y = (int)((world.y - offset.y) * scale.y);
+            screen.x = (int)((world.x - (float)offset.x) * (float)scale.x);
+            screen.y = (int)((world.y - (float)offset.y) * (float)scale.y);
         }
 
-        void ScreenToWorld(olc::vi2d screen, olc::vf2d& world)
+        void WorldToScreen(const olc::vd2d& world, olc::vi2d& screen)
         {
-            world.x = (float)(screen.x) / scale.x + offset.x;
-            world.y = (float)(screen.y) / scale.y + offset.y;
+            screen.x = (int)((world.x - (double)offset.x) * (double)scale.x);
+            screen.y = (int)((world.y - (double)offset.y) * (double)scale.y);
+        }
+
+        void ScreenToWorld(const olc::vi2d& screen, olc::vf2d& world)
+        {
+            world.x = (float)(screen.x) / (float)scale.x + (float)offset.x;
+            world.y = (float)(screen.y) / (float)scale.y + (float)offset.y;
+        }
+
+        void ScreenToWorld(const olc::vi2d& screen, olc::vd2d& world)
+        {
+            world.x = (double)(screen.x) / (double)scale.x + (double)offset.x;
+            world.y = (double)(screen.y) / (double)scale.y + (double)offset.y;
+        }
+
+        void SetOffset(const olc::vd2d& offset)
+        {
+            this->offset = offset;
         }
 
         bool Create(olc::PixelGameEngine *game)
         {
             pge = game;
-            offset.x = -(float)pge->ScreenWidth() / 2.0f;
-            offset.y = -(float)pge->ScreenHeight() / 2.0f;
+            return true;
+        }
+
+        bool Update(float _fElapsedTime)
+        {
+            if (pge == nullptr) return false;
+            if (bPanning)
+            {
+                offset -= (GetMouseVec() - startPan) / scale;
+                startPan = GetMouseVec();
+            }
             return true;
         }
 
@@ -186,34 +134,39 @@ namespace olc {
             bPanning = false;
         }
 
-        void ZoomIn(float fScaleMultiplier = 1.001f)
+        void ZoomIn(double dScaleMultiplier = 1.001)
         {
-            if (fScaleMultiplier <= 1.0f)
-                fScaleMultiplier += 0.0001f;
-            zoom(fScaleMultiplier);
+            if (dScaleMultiplier <= 1.0)
+                dScaleMultiplier += 0.0001;
+            zoom(dScaleMultiplier);
         }
 
-        void ZoomOut(float fScaleMultiplier = 0.999f)
+        void ZoomOut(double dScaleMultiplier = 0.999)
         {
-            if (fScaleMultiplier >= 1.0f)
-                fScaleMultiplier -= 0.0001f;
-            zoom(fScaleMultiplier);
+            if (dScaleMultiplier >= 1.0)
+                dScaleMultiplier -= 0.0001;
+            zoom(dScaleMultiplier);
         }
 
-        bool OnUpdate(float _fElapsedTime)
+        void NudgeLeft(double amount)
         {
-            if (pge == nullptr) return false;
-
-            // handle panning
-            if (bPanning)
-            {
-                offset -= (GetMouseVec() - startPan) / scale;
-                startPan = GetMouseVec();
-            }
-
-            return true;
+            offset.x -= amount / scale.x;
         }
-        
+
+        void NudgeRight(double amount)
+        {
+            offset.x += amount / scale.x;
+        }
+
+        void NudgeUp(double amount)
+        {
+            offset.y -= amount / scale.y;
+        }
+
+        void NudgeDown(double amount)
+        {
+            offset.y += amount / scale.y;
+        }
     };
 }
 
