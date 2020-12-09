@@ -40,7 +40,7 @@ public:
             pz.ZoomOut();
 
         // call pz update method
-        pz.OnUpdate(fElapsedTime);
+        pz.Update(fElapsedTime);
 
         // draw vertical lines
         for (float y = 0.0f; y <= 10.0f; y++)
