@@ -137,14 +137,14 @@ namespace olc {
         void ZoomIn(double dScaleMultiplier = 1.001)
         {
             if (dScaleMultiplier <= 1.0)
-                dScaleMultiplier += 0.0001;
+                dScaleMultiplier = 1.001;
             zoom(dScaleMultiplier);
         }
 
         void ZoomOut(double dScaleMultiplier = 0.999)
         {
             if (dScaleMultiplier >= 1.0)
-                dScaleMultiplier -= 0.0001;
+                dScaleMultiplier = 0.999;
             zoom(dScaleMultiplier);
         }
 
