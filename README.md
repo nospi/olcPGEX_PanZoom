@@ -42,7 +42,7 @@ public:
         // call pz update method
         pz.Update(fElapsedTime);
 
-        // draw vertical lines
+        // draw horizontal lines
         for (float y = 0.0f; y <= 10.0f; y++)
         {
             olc::vf2d w_start, w_end;
@@ -54,7 +54,7 @@ public:
             DrawLine(s_start, s_end);
         }
 
-        // draw horizontal lines
+        // draw vertical lines
         for (float x = 0.0f; x <= 10.0f; x++)
         {
             olc::vf2d w_start, w_end;
