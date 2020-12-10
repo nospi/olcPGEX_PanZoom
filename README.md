@@ -35,7 +35,7 @@ public:
         if (GetMouse(0).bReleased)
             pz.StopPan();
         if (GetKey(olc::Q).bHeld)
-            pz.ZoomIn(1.001f);  // optional fScaleMultiplier parameter
+            pz.ZoomIn(1.001);  // optional dScaleMultiplier parameter
         if (GetKey(olc::A).bHeld)
             pz.ZoomOut();
 
