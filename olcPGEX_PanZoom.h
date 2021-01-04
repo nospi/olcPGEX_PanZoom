@@ -83,7 +83,6 @@ namespace olc
         olc::vf2d scale { 1.0f, 1.0f };
         olc::vf2d mouse;
         bool bPanning = false;
-        olc::vf2d GetMouseVec();
         void zoom(float fScaleFactor);
         void zoom_to_mouse(float fScaleFactor);
     };
@@ -91,11 +90,6 @@ namespace olc
 
 // implementation
 #ifdef OLC_PGEX_PANZOOM
-
-olc::vf2d olc::panzoom::GetMouseVec()
-{
-    return (olc::vf2d)pge->GetMousePos();
-}
 
 void olc::panzoom::zoom(float fScaleFactor)
 {
@@ -109,22 +103,22 @@ void olc::panzoom::zoom(float fScaleFactor)
 void olc::panzoom::zoom_to_mouse(float fScaleFactor)
 {
     olc::vf2d mwPreZoom, mwPostZoom;
-    ScreenToWorld(GetMouseVec(), mwPreZoom);
+    ScreenToWorld(pge->GetMousePos(), mwPreZoom);
     scale *= fScaleFactor;
-    ScreenToWorld(GetMouseVec(), mwPostZoom);
+    ScreenToWorld(pge->GetMousePos(), mwPostZoom);
     offset += (mwPreZoom - mwPostZoom);
 }
 
 void olc::panzoom::WorldToScreen(const olc::vf2d& world, olc::vi2d& screen)
 {
-    screen.x = (int)((world.x - (float)offset.x) * (float)scale.x);
-    screen.y = (int)((world.y - (float)offset.y) * (float)scale.y);
+    screen.x = (int)((world.x - offset.x) * scale.x);
+    screen.y = (int)((world.y - offset.y) * scale.y);
 }
 
 void olc::panzoom::ScreenToWorld(const olc::vi2d& screen, olc::vf2d& world)
 {
-    world.x = (float)(screen.x) / (float)scale.x + (float)offset.x;
-    world.y = (float)(screen.y) / (float)scale.y + (float)offset.y;
+    world.x = (float)(screen.x) / scale.x + offset.x;
+    world.y = (float)(screen.y) / scale.y + offset.y;
 }
 
 void olc::panzoom::SetOffset(const olc::vf2d& offset)
@@ -148,15 +142,15 @@ bool olc::panzoom::Update(float _fElapsedTime)
     if (pge == nullptr) return false;
     if (bPanning)
     {
-        offset -= (GetMouseVec() - startPan) / scale;
-        startPan = GetMouseVec();
+        offset -= ((olc::vf2d)pge->GetMousePos() - startPan) / scale;
+        startPan = (olc::vf2d)pge->GetMousePos();
     }
     return true;
 }
 
 void olc::panzoom::StartPan()
 {
-    startPan = GetMouseVec();
+    startPan = (olc::vf2d)pge->GetMousePos();
     bPanning = true;
 }
 
@@ -168,14 +162,14 @@ void olc::panzoom::StopPan()
 void olc::panzoom::ZoomIn(float fScaleFactor, bool zoomToMouse)
 {
     if (fScaleFactor <= 1.0)
-        fScaleFactor += 0.001;
+        fScaleFactor = 1.001f;
     zoomToMouse ? zoom_to_mouse(fScaleFactor) : zoom(fScaleFactor);
 }
 
 void olc::panzoom::ZoomOut(float fScaleFactor, bool zoomToMouse)
 {
-    if (fScaleFactor >= 1.0)
-        fScaleFactor -= 0.001;
+    if (fScaleFactor >= 1.0f)
+        fScaleFactor = 0.999f;
     zoomToMouse ? zoom_to_mouse(fScaleFactor) : zoom(fScaleFactor);
 }
 
