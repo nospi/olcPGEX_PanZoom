@@ -51,123 +51,164 @@
 
 #ifndef OLC_PGEX_PANZOOM_H
 #define OLC_PGEX_PANZOOM_H
+#include <olcPixelGameEngine.h>
 
-namespace olc {
+// definition
+namespace olc
+{
     class panzoom : public olc::PGEX
     {
-    private:
-        olc::vd2d offset { 0.0, 0.0 };
-        olc::vd2d startPan { 0.0, 0.0 };
-        olc::vd2d scale { 1.0, 1.0 };
-        olc::vd2d mouse;
-        bool bPanning = false;
-
-        olc::vd2d GetMouseVec()
-        {
-            return olc::vd2d((double)pge->GetMouseX(), (double)pge->GetMouseY());
-        }
-
-        void zoom(double dScaleMultiplier)
-        {
-            olc::vd2d mwPreZoom, mwPostZoom;
-            ScreenToWorld(GetMouseVec(), mwPreZoom);
-            scale *= dScaleMultiplier;
-            ScreenToWorld(GetMouseVec(), mwPostZoom);
-            offset += (mwPreZoom - mwPostZoom);
-        }
-
     public:
-        void WorldToScreen(const olc::vf2d& world, olc::vi2d& screen)
-        {
-            screen.x = (int)((world.x - (float)offset.x) * (float)scale.x);
-            screen.y = (int)((world.y - (float)offset.y) * (float)scale.y);
-        }
+        void WorldToScreen(const olc::vf2d& world, olc::vi2d& screen);
+        void ScreenToWorld(const olc::vi2d& screen, olc::vf2d& world);
+        bool Create(olc::PixelGameEngine*);
+        bool Update(float);
+        void ZoomIn(float fScaleFactor = 1.001f, bool zoomToMouse = true);
+        void ZoomOut(float fScaleFactor = 0.999f, bool zoomToMouse = true);
+        void NudgeLeft(float amount);
+        void NudgeRight(float amount);
+        void NudgeUp(float amount);
+        void NudgeDown(float amount);
+        void StartPan();
+        void StopPan();
+        int ToScreenScale(float w);
+        float ToWorldScale(int s);
+        void SetOffset(const olc::vf2d& offset);
+        void SetScale(const olc::vf2d& scale);
 
-        void WorldToScreen(const olc::vd2d& world, olc::vi2d& screen)
-        {
-            screen.x = (int)((world.x - (double)offset.x) * (double)scale.x);
-            screen.y = (int)((world.y - (double)offset.y) * (double)scale.y);
-        }
-
-        void ScreenToWorld(const olc::vi2d& screen, olc::vf2d& world)
-        {
-            world.x = (float)(screen.x) / (float)scale.x + (float)offset.x;
-            world.y = (float)(screen.y) / (float)scale.y + (float)offset.y;
-        }
-
-        void ScreenToWorld(const olc::vi2d& screen, olc::vd2d& world)
-        {
-            world.x = (double)(screen.x) / (double)scale.x + (double)offset.x;
-            world.y = (double)(screen.y) / (double)scale.y + (double)offset.y;
-        }
-
-        void SetOffset(const olc::vd2d& offset)
-        {
-            this->offset = offset;
-        }
-
-        bool Create(olc::PixelGameEngine *game)
-        {
-            pge = game;
-            return true;
-        }
-
-        bool Update(float _fElapsedTime)
-        {
-            if (pge == nullptr) return false;
-            if (bPanning)
-            {
-                offset -= (GetMouseVec() - startPan) / scale;
-                startPan = GetMouseVec();
-            }
-            return true;
-        }
-
-        void StartPan()
-        {
-            startPan = GetMouseVec();
-            bPanning = true;
-        }
-
-        void StopPan()
-        {
-            bPanning = false;
-        }
-
-        void ZoomIn(double dScaleMultiplier = 1.001)
-        {
-            if (dScaleMultiplier <= 1.0)
-                dScaleMultiplier = 1.001;
-            zoom(dScaleMultiplier);
-        }
-
-        void ZoomOut(double dScaleMultiplier = 0.999)
-        {
-            if (dScaleMultiplier >= 1.0)
-                dScaleMultiplier = 0.999;
-            zoom(dScaleMultiplier);
-        }
-
-        void NudgeLeft(double amount)
-        {
-            offset.x -= amount / scale.x;
-        }
-
-        void NudgeRight(double amount)
-        {
-            offset.x += amount / scale.x;
-        }
-
-        void NudgeUp(double amount)
-        {
-            offset.y -= amount / scale.y;
-        }
-
-        void NudgeDown(double amount)
-        {
-            offset.y += amount / scale.y;
-        }
+    private:
+        olc::PixelGameEngine* pge;
+        olc::vf2d offset { 0.0f, 0.0f };
+        olc::vf2d startPan { 0.0f, 0.0f };
+        olc::vf2d scale { 1.0f, 1.0f };
+        olc::vf2d mouse;
+        bool bPanning = false;
+        olc::vf2d GetMouseVec();
+        void zoom(float fScaleFactor);
+        void zoom_to_mouse(float fScaleFactor);
     };
+};
+
+// implementation
+#ifdef OLC_PGEX_PANZOOM
+
+olc::vf2d olc::panzoom::GetMouseVec()
+{
+    return (olc::vf2d)pge->GetMousePos();
 }
+
+void olc::panzoom::zoom(float fScaleFactor)
+{
+    olc::vf2d cPre, cPost;
+    ScreenToWorld({ pge->ScreenWidth() >> 1, pge->ScreenHeight() >> 1 }, cPre);
+    scale *= fScaleFactor;
+    ScreenToWorld({ pge->ScreenWidth() >> 1, pge->ScreenHeight() >> 1 }, cPost);
+    offset += cPre - cPost;
+}
+
+void olc::panzoom::zoom_to_mouse(float fScaleFactor)
+{
+    olc::vf2d mwPreZoom, mwPostZoom;
+    ScreenToWorld(GetMouseVec(), mwPreZoom);
+    scale *= fScaleFactor;
+    ScreenToWorld(GetMouseVec(), mwPostZoom);
+    offset += (mwPreZoom - mwPostZoom);
+}
+
+void olc::panzoom::WorldToScreen(const olc::vf2d& world, olc::vi2d& screen)
+{
+    screen.x = (int)((world.x - (float)offset.x) * (float)scale.x);
+    screen.y = (int)((world.y - (float)offset.y) * (float)scale.y);
+}
+
+void olc::panzoom::ScreenToWorld(const olc::vi2d& screen, olc::vf2d& world)
+{
+    world.x = (float)(screen.x) / (float)scale.x + (float)offset.x;
+    world.y = (float)(screen.y) / (float)scale.y + (float)offset.y;
+}
+
+void olc::panzoom::SetOffset(const olc::vf2d& offset)
+{
+    this->offset = offset;
+}
+
+void olc::panzoom::SetScale(const olc::vf2d& scale)
+{
+    this->scale = scale;
+}
+
+bool olc::panzoom::Create(olc::PixelGameEngine *game)
+{
+    pge = game;
+    return true;
+}
+
+bool olc::panzoom::Update(float _fElapsedTime)
+{
+    if (pge == nullptr) return false;
+    if (bPanning)
+    {
+        offset -= (GetMouseVec() - startPan) / scale;
+        startPan = GetMouseVec();
+    }
+    return true;
+}
+
+void olc::panzoom::StartPan()
+{
+    startPan = GetMouseVec();
+    bPanning = true;
+}
+
+void olc::panzoom::StopPan()
+{
+    bPanning = false;
+}
+
+void olc::panzoom::ZoomIn(float fScaleFactor, bool zoomToMouse)
+{
+    if (fScaleFactor <= 1.0)
+        fScaleFactor += 0.001;
+    zoomToMouse ? zoom_to_mouse(fScaleFactor) : zoom(fScaleFactor);
+}
+
+void olc::panzoom::ZoomOut(float fScaleFactor, bool zoomToMouse)
+{
+    if (fScaleFactor >= 1.0)
+        fScaleFactor -= 0.001;
+    zoomToMouse ? zoom_to_mouse(fScaleFactor) : zoom(fScaleFactor);
+}
+
+void olc::panzoom::NudgeLeft(float amount)
+{
+    offset.x -= amount / scale.x;
+}
+
+void olc::panzoom::NudgeRight(float amount)
+{
+    offset.x += amount / scale.x;
+}
+
+void olc::panzoom::NudgeUp(float amount)
+{
+    offset.y -= amount / scale.y;
+}
+
+void olc::panzoom::NudgeDown(float amount)
+{
+    offset.y += amount / scale.y;
+}
+
+int olc::panzoom::ToScreenScale(float w)
+{
+    return (int)(w * scale.x);
+}
+
+float olc::panzoom::ToWorldScale(int s)
+{
+    return (float)(s / scale.x);
+}
+
+#endif /* ifdef OLC_PGEX_PANZOOM */
 
 #endif /* ifndef OLC_PGEX_PANZOOM_H */

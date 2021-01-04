@@ -2,82 +2,8 @@
 Basic Pan/Zoom extension for [olc::PixelGameEngine](https://github.com/OneLoneCoder/olcPixelGameEngine).
 Adapted from javidx9's [panning & zooming tutorial](https://www.youtube.com/watch?v=ZQ8qtAizis4).
 
-# Example Use Case
-~~~~~~~~~~~~~~~
-#define OLC_PGE_APPLICATION
-#include "olcPixelGameEngine.h"
-#include "olcPGEX_PanZoom.h"
-
-class PanZoomDemo : public olc::PixelGameEngine
-{
-private:
-    olc::panzoom pz;
-
-public:
-    PanZoomDemo()
-    {
-        sAppName = "Pan/Zoom PGEX Demo";
-    }
-
-    bool OnUserCreate() override
-    {
-        pz.Create(this);    // pass instance of PGE
-        return true;
-    }
-
-    bool OnUserUpdate(float fElapsedTime)
-    {
-        Clear(0);
-
-        // pass input to panzoom
-        if (GetMouse(0).bPressed)
-            pz.StartPan();
-        if (GetMouse(0).bReleased)
-            pz.StopPan();
-        if (GetKey(olc::Q).bHeld)
-            pz.ZoomIn(1.001);  // optional dScaleMultiplier parameter
-        if (GetKey(olc::A).bHeld)
-            pz.ZoomOut();
-
-        // call pz update method
-        pz.Update(fElapsedTime);
-
-        // draw horizontal lines
-        for (float y = 0.0f; y <= 10.0f; y++)
-        {
-            olc::vf2d w_start, w_end;
-            olc::vi2d s_start, s_end;
-            w_start = { 0.0f, y };
-            w_end = { 10.0f, y };
-            pz.WorldToScreen(w_start, s_start);
-            pz.WorldToScreen(w_end, s_end);
-            DrawLine(s_start, s_end);
-        }
-
-        // draw vertical lines
-        for (float x = 0.0f; x <= 10.0f; x++)
-        {
-            olc::vf2d w_start, w_end;
-            olc::vi2d s_start, s_end;
-            w_start = { x, 0.0f };
-            w_end = { x, 10.0f };
-            pz.WorldToScreen(w_start, s_start);
-            pz.WorldToScreen(w_end, s_end);
-            DrawLine(s_start, s_end);
-        }
-
-        return true;
-    }
-};
-
-int main()
-{
-    PanZoomDemo demo;
-    demo.Construct(320, 200, 4, 4);
-    demo.Start();
-    return 0;
-}
-~~~~~~~~~~~~~~~
+# Example
+Please see the `example.cpp` file for a full working demo. Don't forget to `#define OLC_PGEX_PANZOOM` alongside `OLC_PGE_APPLICATION`.
 
 # License (OLC-3)
 ~~~~~~~~~~~~~~~
